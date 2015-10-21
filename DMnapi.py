@@ -17,7 +17,7 @@ import os, os.path, socket, re
 import dmnapim
 reload(dmnapim)
 
-dmnapi_py = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapi.py"
+dmnapi_py = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapi"
 dmnapi_ins = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapiinst.py"
 
 class N24Screen(Screen):

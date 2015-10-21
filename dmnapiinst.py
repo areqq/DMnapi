@@ -286,7 +286,7 @@ if __name__ == "__main__":
     print
 
     try:
-        for f in ("/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapi.py", "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapiinst.py"):
+        for f in ("/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapi", "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapiinst.py"):
             if not os.access(f, os.X_OK):
                 print "DMNapi: fix permission"
                 os.chmod(f, 0555)
