@@ -14,12 +14,12 @@ from StringIO import StringIO
 
 class ConfigScreen(ConfigListScreen,Screen):
     def __init__(self, session):
-    
+
         if config.plugins.dmnapitmp.fhd.value:
             self.skin = """
               <screen position="center,center" size="825,575" title=""  flags="wfNoBorder">
                   <widget name="info" position="0,0" size="825,30" font="Regular;26" halign="right" backgroundColor="#193e"/>
-                  <widget name="config" position="10,33" size="805,450" itemHeight="40" scrollbarMode="showOnDemand" /> 
+                  <widget name="config" position="10,33" size="805,450" itemHeight="40" font="Regular;26" scrollbarMode="showOnDemand" />
                   <widget name="buttonred" position="18,540" size="180,30" font="Regular;26" halign="left" backgroundColor="background"/>
                   <widget name="buttongreen" position="213,540" size="180,30" font="Regular;26" halign="left" backgroundColor="background"/>
                   <widget name="buttonyellow" position="413,540" size="180,30" font="Regular;26" halign="left" backgroundColor="background"/>
@@ -32,17 +32,17 @@ class ConfigScreen(ConfigListScreen,Screen):
         else:
             self.skin = """
                 <screen position="99,100" size="550,383" title="" flags="wfNoBorder">
-                <widget name="info" position="0,0" size="550,30" font="Regular; 24" halign="right" backgroundColor="#193e" />
-                <widget name="config" position="0,37" size="550,300" scrollbarMode="showOnDemand" />
-                <widget name="buttonred" position="15,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
-                <widget name="buttongreen" position="150,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
-                <widget name="buttonyellow" position="285,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
-                <widget name="buttonblue" position="420,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
-                <eLabel position="5,360" size="5,20" backgroundColor="red" />
-                <eLabel position="140,360" size="5,20" backgroundColor="green" />
-                <eLabel position="275,360" size="5,20" backgroundColor="yellow" />
-                <eLabel position="410,360" size="5,20" backgroundColor="blue" />
-                </screen> 
+                    <widget name="info" position="0,0" size="550,30" font="Regular; 24" halign="right" backgroundColor="#193e" />
+                    <widget name="config" position="0,37" size="550,300" scrollbarMode="showOnDemand" />
+                    <widget name="buttonred" position="15,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
+                    <widget name="buttongreen" position="150,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
+                    <widget name="buttonyellow" position="285,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
+                    <widget name="buttonblue" position="420,360" size="120,20" font="Regular;18" halign="left" backgroundColor="background" />
+                    <eLabel position="5,360" size="5,20" backgroundColor="red" />
+                    <eLabel position="140,360" size="5,20" backgroundColor="green" />
+                    <eLabel position="275,360" size="5,20" backgroundColor="yellow" />
+                    <eLabel position="410,360" size="5,20" backgroundColor="blue" />
+                </screen>
                 """
         self.session = session
         Screen.__init__(self, session)
@@ -90,7 +90,7 @@ class ConfigScreen(ConfigListScreen,Screen):
 
     def nic(self, c = None):
         pass
-        
+
     def patch(self):
         self.session.open(Console,_("Install:"), ["/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapiinst.py"] )
 

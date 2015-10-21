@@ -55,7 +55,7 @@ def http_n24(url):
     return content
 
 def get_n24(subid):
-    url = 'http://napisy24.pl/download/sr/%i/' % subid
+    url = 'http://napisy24.pl/run/pages/download.php?napisId=%i' % subid
     try:
         z = zipfile.ZipFile(StringIO( http_n24(url) ))
         s = 0

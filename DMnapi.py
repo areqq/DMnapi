@@ -79,13 +79,13 @@ class DMnapi(Screen):
         self["info"] = Label("DMnapi %s  -  http://areq.eu.org/" % config.plugins.dmnapitmp.version.value)
         self["label"] = Label(" Path: %s\n   File: %s\n" % ( path, file) )
         self["right"] = Label("")
-        
+
         self.statust = ''
         if config.plugins.dmnapitmp.fhd.value:
            self.skin = """<screen name="DMnapi" position="center,center" size="1500,495" title="DMnapi by areq" flags="wfNoBorder">
                         <widget name="info" position="0,0" size="1500,30" font="Regular;27" halign="right" backgroundColor="#193e"/>
                         <widget name="label" position="0,33" size="1500,66" font="Regular;27" halign="left" backgroundColor="background"/>
-                        <widget name="menu" position="10,112" size="600,210" scrollbarMode="showOnDemand" />
+                        <widget name="menu" position="10,112" size="600,310" itemHeight="34" font="Regular;26" scrollbarMode="showOnDemand" />
                         <widget name="status" position="0,420" size="1500,66" font="Regular;27" halign="left" backgroundColor="background"/>
                         <widget name="right" position="660,105" size="830,310" font="Regular;27" halign="left" backgroundColor="#193e"/>
                         </screen>"""
@@ -101,7 +101,7 @@ class DMnapi(Screen):
         Screen.__init__(self, session)
 
         self.list = [( " ", "")]
- 
+
         ext = file[-3:]
         self.list.append((_("Pobierz napisy z NapiProjekt"), "getnapi"))
         self.list.append((_("Pobierz napisy z napisy24.pl wg. hash"), "napisy24hash"))
@@ -110,7 +110,7 @@ class DMnapi(Screen):
         self.list.append((_("Pobierz napisy dla wszystkich *." + ext ), "getnapiall"))
         self.list.append((_("Konwertuj istniejace napisy"), "convert"))
         self.list.append(("Konfiguracja", "configure"))
-        
+
         self["menu"] = MenuList(self.list)
         self["actions"] = ActionMap(["OkCancelActions", "ColorActions"], {"ok": self.run, "cancel": self.koniec,"green": self.green, }, -1)
         self.onLayoutFinish.append(self.onStart)
@@ -157,10 +157,10 @@ class DMnapi(Screen):
                         self.needRestart = True
                         srtonhddOK = True
                         break
-                        
+
         if config.plugins.dmnapi.autodownload.value: 
             self.get_np()
-        
+
         if self.amenu and config.plugins.dmnapi.autosrton.value:
             if srtonhddOK:
                 self.runSRT = True
@@ -170,7 +170,7 @@ class DMnapi(Screen):
         self.timerrestart.stop()
         self.timersrt.stop()
         self.timer.stop()
-    
+
     def tt(self):
         s = ''
         for i in ['napiprojekt', 'napisy24']:
@@ -348,6 +348,7 @@ class DMnapi(Screen):
     def restart_play(self, plus = 0):
         try:
             print "[DMnapi] restart_play"
+            set_subtitles(self, None)
             oldref = self.session.nav.getCurrentlyPlayingServiceReference()
             service = self.session.nav.getCurrentService()
             seek = service.seek()
@@ -479,4 +480,3 @@ class DMnapi(Screen):
             print 'DMnapi - imdb - problem'
             import traceback
             traceback.print_exc()
-
