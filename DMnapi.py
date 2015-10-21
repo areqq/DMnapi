@@ -67,11 +67,13 @@ def set_subtitles(self, subtitles):
         traceback.print_exc()
 
 class DMnapi(Screen):
-    def __init__(self, session, args = None, auto = False):
+    def __init__(self, session, args = None, auto = False, save = True):
         self.session = session
         self.amenu = auto
         self.plik = args
+        self.save = save
         self.subs = {}
+        self.srt = ''
         (path, file) = os.path.split(self.plik)
         print "DMnapi init plik: %s, auto: %s" % (self.plik, auto)
 
@@ -255,7 +257,9 @@ class DMnapi(Screen):
             if returnValue == "getnapi":
                 if not self.saveSRT(self.subs.get('napiprojekt', '')):
                     self.session.openWithCallback(self.poPobraniu, Console,_("Download subtitle:"),['%s get %s "%s"' % (dmnapi_py, self.get_fps(), self.plik )])
-                        #self.close(None)
+                elif self.save == False:
+                        print "DMnapi: mam napisy, zwracam do afp"
+                        self.close(self.srt)
             elif returnValue == "getnapiall":
                 self.session.open(Console,_("Download subtitle:"),['%s all %s "%s"' % (dmnapi_py, self.get_fps(), self.plik )])
             elif returnValue == "getnapiallnew":
@@ -288,6 +292,10 @@ class DMnapi(Screen):
             elif returnValue == "napisy24hash":
                 if not self.saveSRT(self.subs.get('napisy24', '')):
                     self.napisy24h()
+                elif self.save == False:
+                    print "DMnapi: mam napisy, zwracam do afp"
+                    self.close(self.srt)
+                    
             elif returnValue == "configure":
                 import configure
                 reload(configure)
@@ -298,13 +306,18 @@ class DMnapi(Screen):
     def saveSRT(self, html):
         print "DMnapi saveSRT:", len(html)
         if len(html) > 100:
-            s = self.prepare_srt(html)
+            s = self.prepare_srt(html, self.save)
             if s:
-                self.status('SRT zapisane')
-                if self.amenu:
-                    self.needRestart = True
-                    self.runSRT = True
-                return True
+                if self.save:
+                    self.status('SRT zapisane')
+                    if self.amenu:
+                        self.needRestart = True
+                        self.runSRT = True
+                    return True
+                else:
+                    print "DMnapi saveSRT: bez zapisu"
+                    self.srt = s
+                    return True
             else:
                 self.status('problem ;(')
         return False
