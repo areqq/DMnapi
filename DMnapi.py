@@ -10,6 +10,7 @@ from Screens.MessageBox import MessageBox
 from Screens.ChoiceBox import ChoiceBox
 from Screens.InfoBar import InfoBar
 from Screens.VirtualKeyBoard import VirtualKeyBoard
+from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from enigma import eTimer, iPlayableService, iServiceInformation
 from twisted.web.client import getPage
 import urllib, urllib2, json
@@ -17,8 +18,8 @@ import os, os.path, socket, re
 import dmnapim
 reload(dmnapim)
 
-dmnapi_py = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapi"
-dmnapi_ins = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/dmnapiinst.py"
+dmnapi_py = resolveFilename(SCOPE_PLUGINS, "Extensions/DMnapi/dmnapi")
+dmnapi_ins = resolveFilename(SCOPE_PLUGINS, "Extensions/DMnapi/dmnapiinst.py")
 
 class N24Screen(Screen):
     def __init__(self, session, list = None):
