@@ -5,6 +5,8 @@
 #    Support: http://dvhk.pl/
 #    http://e2.areq.eu.org/
 
+import sys, re, os.path
+
 DM_patch = { "FileBrowser": [[[
 """
 					self.SetGB(_("Play"))
@@ -238,8 +240,32 @@ def patch(fn, FB):
                 FB = FB.replace(s, r)
     return FB
 
+def DreamExplorer():
+    de = '/usr/lib/enigma2/python/Plugins/Extensions/DreamExplorer/'
+    insDE = True
+    for i in ['plugin.pyo', 'plugin.pyc', 'plugin.py']:
+        f = de + i
+        if os.path.isfile(f):
+            if open(f).read().find('dmnapi20150328') > 0:
+                insDE = False
+            else:
+                if f[-1] != 'y':
+                    os.remove(f)
+    if insDE:
+        print 'DMnapi, brak DreamExplorer, instaluje...'
+        try:
+            import zipfile, urllib2
+            from StringIO import StringIO
+            os.system('rm -fr /usr/lib/enigma2/python/Plugins/Extensions/DreamExplorer/')
+            z = zipfile.ZipFile(StringIO(urllib2.urlopen('http://e2.areq.eu.org/dmnapi/DreamExplorer.zip').read() ))
+            z.extractall('/usr/lib/enigma2/python/Plugins/Extensions/')
+            print "DMnapi, DreamExplorer zainstalowany"
+        except:
+            print "DMnapi, brak DreamExplorer, problem"
+            import traceback
+            traceback.print_exc()
+
 if __name__ == "__main__":
-    import sys, re, os.path
 
     print "DMnapi installer by areq.\n"
     for d, f, v, reg in [ \
@@ -294,38 +320,10 @@ if __name__ == "__main__":
         print "DMnapi Error: chmod problem"
         pass
 
-    de = '/usr/lib/enigma2/python/Plugins/Extensions/DreamExplorer/'
-    insDE = True
-    for i in ['plugin.pyo', 'plugin.pyc', 'plugin.py']:
-        f = de + i
-        if os.path.isfile(f):
-            if open(f).read().find('dmnapi20150328') > 0:
-                insDE = False
-            else:
-                if f[-1] != 'y':
-                    os.remove(f)
-    if insDE:
-        print 'DMnapi, brak DreamExplorer, instaluje...'
-        try:
-            import zipfile, urllib2
-            from StringIO import StringIO
-            os.system('rm -fr /usr/lib/enigma2/python/Plugins/Extensions/DreamExplorer/')
-            z = zipfile.ZipFile(StringIO(urllib2.urlopen('http://e2.areq.eu.org/dmnapi/DreamExplorer.zip').read() ))
-            z.extractall('/usr/lib/enigma2/python/Plugins/Extensions/')
-            print "DMnapi, DreamExplorer zainstalowany"
-        except:
-            print "DMnapi, brak DreamExplorer, problem"
-            import traceback
-            traceback.print_exc()
+    if not os.access('/var/grun/grcstype', os.R_OK):
+        DreamExplorer()
+    else:
+        print "GOS detected. Please install enigma2-plugin-dreamexplorer package"
 
-#	import urllib2
-#	latest = re.search('Latest version: .strong.(1[2-9]\..*)..strong', urllib2.urlopen('http://code.google.com/p/dmnapi/wiki/DMnapi').read(),re.MULTILINE ).group(1)
-#	print "Your DMnapi version: %s, latest is: %s " % ( VERSION, latest)
-#	if VERSION != latest:
-#		print "\n\nUpgrade plugin to latest edition\n"
-#		url = "http://dmnapi.googlecode.com/files/enigma2-plugin-extensions-dmnapi_%s_all.ipk" % latest
-#		cmd = "cd /tmp ; rm -f enigma2-plugin-extensions-dmnapi*.ipk ; opkg update ; wget -c %s ; ls -al enigma2-plugin-extensions-dmnapi*.ipk ; opkg install enigma2-plugin-extensions-dmnapi*.ipk" % url
-#		print cmd
-#		os.system(cmd)
-print "Finished."
+    print "Finished."
 
