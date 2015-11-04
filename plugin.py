@@ -74,6 +74,13 @@ class DMnapiEV(Screen):
     def __evUpdatedInfo(self):
         if self.newService:
             self.newService = False
+            try:
+                if config.plugins.AdvancedFreePlayer.PlayerOn.value:
+                    print "DMnapi: __evUpdatedInfo AVP running - skip autorun"
+                    return
+            except:
+                pass
+
             c = if_played_movie(self.session)
             print "DMnapi: __evUpdatedInfo", c
             if c:
