@@ -53,7 +53,6 @@ class DMnapiEV(Screen):
 
     def up(self):
         try:
-            print "DMnapi up start"
             import version
             reload(version)
             u = version.Update(self.session)
@@ -62,7 +61,7 @@ class DMnapiEV(Screen):
                 self.box = version.get_box_info()
                 config.plugins.dmnapitmp.box.value = self.box
         except:
-            print "DMnapi up problem"
+            print "DMnapi: up problem"
             import traceback
             traceback.print_exc()
 
