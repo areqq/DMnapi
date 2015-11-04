@@ -3,7 +3,7 @@
 #    Version: 15.03.21
 #    Coded by areq (c) 2010-2015
 #    Support: http://dvhk.pl/
-#    http://e2.areq.eu.org/
+#    http://areq.eu.org/
 
 import sys, re, os.path
 
@@ -257,7 +257,7 @@ def DreamExplorer():
             import zipfile, urllib2
             from StringIO import StringIO
             os.system('rm -fr /usr/lib/enigma2/python/Plugins/Extensions/DreamExplorer/')
-            z = zipfile.ZipFile(StringIO(urllib2.urlopen('http://e2.areq.eu.org/dmnapi/DreamExplorer.zip').read() ))
+            z = zipfile.ZipFile(StringIO(urllib2.urlopen('http://areq.eu.org/dmnapi/DreamExplorer.zip').read() ))
             z.extractall('/usr/lib/enigma2/python/Plugins/Extensions/')
             print "DMnapi, DreamExplorer zainstalowany"
         except:
