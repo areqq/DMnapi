@@ -328,10 +328,9 @@ class DMnapi(Screen):
             res = self.n24ask
         if not res.startswith(('imdb=', 'title=')):
             res = 'title=' + res 
-        import N24
         url = ('http://napisy24.pl/libs/webapi.php?' + res).replace(' ','%20')
         print "[DMnapi] n24 url:", url
-        m24res = N24.parse_n24(N24.http_n24(url).split('\n'))
+        m24res = dmnapim.parse_n24(dmnapim.http_n24(url).split('\n'))
         print "[DMnapi] n24 list:", m24res
         askList = []
         for x,y in m24res.items():

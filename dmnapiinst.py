@@ -320,10 +320,21 @@ if __name__ == "__main__":
         print "DMnapi Error: chmod problem"
         pass
 
-    if not os.access('/var/grun/grcstype', os.R_OK):
+    if not os.path.exists('/var/grun/grcstype'):
         DreamExplorer()
     else:
         print "GOS detected. Please install enigma2-plugin-dreamexplorer package"
+
+    # porzadki po starej wersji
+    for f in ['N24.py', 'dmnapi.py']:
+        for e in ['', 'o', 'c']:
+            d = "/usr/lib/enigma2/python/Plugins/Extensions/DMnapi/" + f + e
+            if  os.path.exists(d):
+                print "Kasuje:", f
+                try:
+                     os.remove(d)
+                except:
+                    pass
 
     print "Finished."
 
