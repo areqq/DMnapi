@@ -4,8 +4,7 @@
 # napiprojekt.pl API is used with napiproject administration consent
 
 import os, os.path, re, string, sys, time, urllib, urllib2, socket
-import struct
-import zipfile
+import base64, struct, zipfile
 from hashlib import md5 as md5
 from StringIO import StringIO
 
@@ -96,38 +95,36 @@ def f(z):
 
     return ''.join(b)
 
-def get_subtitle(digest, lang="PL"):
-    url = "http://napiprojekt.pl/unit_napisy/dl.php?l=%s&f=%s&t=%s&v=pynapi&kolejka=false&nick=&pass=&napios=%s" % \
-        (lang, digest, f(digest), os.name)
-    repeat = 3
-    sub = None
-    http_code = 200
-    error = "Fetching subtitle failed:"
-    while repeat > 0:
-        repeat = repeat - 1
-        try:
-            sub = urllib2.urlopen(url)
-            if hasattr(sub, 'getcode'):
-                http_code = sub.getcode()
-            sub = sub.read()
-        except (IOError, OSError), e:
-            error = error + " %s" % (e)
-            time.sleep(0.5)
-            continue
+def get_subtitle(digest, lang = "PL"):
+    sub = ''
+    try:
+        req = urllib2.Request("http://napiprojekt.pl/api/api-napiprojekt3.php", np_postdata(digest, lang))
+        t = urllib2.urlopen(req).read()
+        sub = np_parsexml(t)
+    except:
+        pass
+    return sub
 
-        if http_code != 200:
-            error = error + ",HTTP code: %s" % (str(http_code))
-            time.sleep(0.5)
-            continue
+def np_postdata(digest, lang = "PL"):
+    data = {
+        "downloaded_subtitles_id" : digest,
+        "mode" : "1",
+        "client" : "DMnapi",
+        "client_ver" : "15.11.08",
+        "downloaded_subtitles_lang" : lang,
+        "downloaded_subtitles_txt" : "1" }
+    return urllib.urlencode(data)
 
-        if sub.startswith('NPc'):
-            raise Exception('Subtitle NOT FOUND')
-
-        repeat = 0
-
-    if sub is None or sub == "":
-        raise Exception(error)
-
+def np_parsexml(t):
+    sub = ''
+    try:
+        if t.find('<status>success</status>') > 0:
+            s = t.find('><content><![CDATA[') + 19
+            e = t.find(']]></content><')
+            if s > 30 and e > s:
+                sub = base64.b64decode(t[s:e])
+    except:
+        pass
     return sub
 
 def detect_format(list):
@@ -394,7 +391,14 @@ def read_sub(fmt, subs):
 
 def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
     p, f = os.path.split(file)
-    print "Processing subtitle for:\n Path: %s\n File: %s %s fps: %.2f" % (p, f, info, fps)
+    if fps > 0:
+        tfps = " fps: %.2f" % fps
+    else:
+        tfps = ""
+    print "Processing subtitle for:\n Path: %s\n File: %s %s %s" % (p, f, info, tfps)
+    if len(subs_org) < 100:
+        print "Subtitle not found ;("
+        return ""
     try:
         subs_org = subs_org.replace("\r","").replace('{Y:i}',' ').replace('{y:i}',' ')
         dest = file[:-4] + '.srt'
@@ -588,7 +592,7 @@ def get_n24_by_hash(file, item ):
         print "DMnapi n24 by hash problem"
         import traceback
         traceback.print_exc()
-    return '', k#!/usr/bin/python -u
+    return '', k
 
 def parse_n24(lines):
     id = 0

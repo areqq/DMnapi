@@ -389,22 +389,25 @@ class DMnapi(Screen):
         self.napisy24h()
         
     def napiprojekt(self):
-        url = "http://napiprojekt.pl/unit_napisy/dl.php?l=%s&f=%s&t=%s&v=pynapi&kolejka=false&nick=&pass=&napios=%s" % \
-        ('PL', self.fh['npb'] , dmnapim.f(self.fh['npb']), os.name)
-        getPage(url).addCallback(self.znp).addErrback(self.znpe)
+        body = dmnapim.np_postdata(self.fh['npb'], 'PL') 
+        apiUrl = "http://napiprojekt.pl/api/api-napiprojekt3.php"
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        getPage(apiUrl, method = 'POST', postdata = body, headers = headers).addCallback(self.znp).addErrback(self.znpe)
         
     def znpe(self, error = None):
         print "DMnapi getPageError:", error
         self.subs['napiprojekt'] = ''
 
     def znp(self, html):
-        print "DMnapi znp", len(html)
+        print "DMnapi: znp", len(html)
         if html and len(html) > 100:
-            s = self.prepare_srt(html, False)
-            if s and len(s) > 100:
-                self.subs['napiprojekt'] = s
-        else:
-            self.subs['napiprojekt'] = ''
+            html = dmnapim.np_parsexml(html)
+            if html and len(html) > 100:
+                s = self.prepare_srt(html, False)
+                if s and len(s) > 100:
+                    self.subs['napiprojekt'] = s
+            else:
+                self.subs['napiprojekt'] = ''
 
     def napisy24h(self):
 #        self.timern24.start(20, True)
