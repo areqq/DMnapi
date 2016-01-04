@@ -103,8 +103,9 @@ class DMnapi(Screen):
 
         Screen.__init__(self, session)
 
-        self.list = [( " ", "")]
-
+        self.list = []
+        if auto:
+            self.list.append(( " ", ""))
         ext = file[-3:]
         self.list.append((_("Pobierz napisy z NapiProjekt"), "getnapi"))
         self.list.append((_("Pobierz napisy z napisy24.pl wg. hash"), "napisy24hash"))
