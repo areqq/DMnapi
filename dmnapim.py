@@ -7,6 +7,7 @@ import os, os.path, re, string, sys, time, urllib, urllib2, socket
 import base64, struct, zipfile
 from hashlib import md5 as md5
 from StringIO import StringIO
+import subutil
 
 class GetFPS(object):
     def __init__(self, filename):
@@ -127,248 +128,6 @@ def np_parsexml(t):
         pass
     return sub
 
-def detect_format(list):
-    """
-    Detect the format of input subtitles file.
-    input: contents of a file as list
-    returns: format (srt, tmp, mdvd) or "" if unknown
-    """
-    re_mdvd = re.compile("^\{(\d+)\}\{(\d*)\}\s*(.*)")
-    re_srt = re.compile("^(\d+):(\d+):(\d+),\d+\s*-->.*")
-    re_tmp = re.compile("^(\d+):(\d+):(\d+):(.*)")
-    re_sub2 = re.compile("^(\d+):(\d+):(\d+)\.\d+\s*\,.*")
-    re_mpl2 = re.compile("^\[(\d+)\]\[(\d+)\]\s*(.*)")
-    for line in list:
-        if re_mdvd.match(line):
-            return "mdvd"
-        elif re_srt.match(line):
-            return "srt"
-        elif re_tmp.match(line):
-            return "tmp"
-        elif re_sub2.match(line):
-            return "sub2"
-        elif re_mpl2.match(line):
-            return "mpl2"
-    return ""
-
-
-def read_mdvd(list, fps):
-    """
-    Read micro-dvd subtitles.
-    input: contents of a file as list
-    returns: list of subtitles in form: [[time_start in secs, time_end in secs, line1, ...],....]
-    """
-    re1 = re.compile("^\{(\d+)\}\{(\d*)\}\s*(.*)")
-
-    subtitles = []
-    while len(list)>0:
-        x = list.pop(0)
-        m = re1.match(x, 0)
-        if m:
-            time1 = int(m.group(1))
-            subt = [ time1 / fps ]
-            time2 = m.group(2)
-            if time2 == '':
-                time2 = int(time1) + 20
-            subt.append(int(time2) / fps)
-            texts = m.group(3).strip().split("|")
-            for i in range(len(texts)):
-                text = texts[i]
-                if text.lower().startswith('{c:') or text.lower().startswith('{y:'):
-                    end_marker = text.index('}')
-                    if end_marker:
-                        text = text[end_marker + 1:]
-                        texts[i] = text
-            subt.extend(texts)
-            subtitles.append(subt)
-    return subtitles
-
-def read_mpl2(list):
-    """
-    Read mpl2 subtitles
-    input: contents of a file as list
-    returns: list of subtitles in form: [[time_start in secs, time_end is secs, line1, ...],.....]
-    """
-    re1 = re.compile("^\[(\d+)\]\[(\d+)\]\s*(.*)")
-    subtitles = []
-    while len(list)>0:
-        m = re1.match(list.pop(0),0);
-        if m:
-            subt = [int(m.group(1))*0.1]
-            subt.append(int(m.group(2))*0.1)
-            subt.extend(m.group(3).strip().split("|"))
-            subtitles.append(subt)
-    return subtitles
-
-def read_sub2(list):
-    """
-    Reads subviewer 2.0 format subtitles, e.g. :
-        00:01:54.75,00:01:58.54
-        You shall not pass!
-    input: contents of a file as list
-    returns: list of subtitles in form: [[time_dep, time_end, line1, ...],[time_dep, time_end, line1, ...],....]
-    """
-    re1 = re.compile("^(\d+):(\d+):(\d+)\.(\d+)\s*\,\s*(\d+):(\d+):(\d+)\.(\d+).*$")
-    subtitles = []
-    try:
-        while len(list)>0:
-            m = re1.match(list.pop(0), 0)
-            if m:
-                subt = [int(m.group(1))*3600 + int(m.group(2))*60 + int(m.group(3)) + int(m.group(4))/100.0]
-                subt.append(int(m.group(5))*3600 + int(m.group(6))*60 + int(m.group(7)) + int(m.group(8))/100.0)
-                l = list.pop(0).strip()
-                lines = l.split("[br]")
-                for i in range(0,len(lines)):
-                    subt.append(lines[i])
-                subtitles.append(subt)
-    except IndexError:
-        sys.stderr.write("Warning: it seems like input file is damaged or too short.\n")
-    return subtitles
-
-def read_srt(list):
-    """
-    Reads srt subtitles.
-    input: contents of a file as list
-    returns: list of subtitles in form: [[time_dep, time_end, line1, ...],[time_dep, time_end, line1, ...],....]
-    """
-    re1 = re.compile("^(\d+)\s*$")
-    re2 = re.compile("^(\d+):(\d+):(\d+),(\d+)\s*-->\s*(\d+):(\d+):(\d+),(\d+).*$")
-    re3 = re.compile("^\s*$")
-    subtitles = []
-    try:
-        while len(list)>0:
-            if re1.match(list.pop(0), 0):
-                m = re2.match(list.pop(0), 0)
-                if m:
-                    subt = [int(m.group(1))*3600 + int(m.group(2))*60 + int(m.group(3)) + int(m.group(4))/1000.0]
-                    subt.append(int(m.group(5))*3600 + int(m.group(6))*60 + int(m.group(7)) + int(m.group(8))/1000.0)
-                    l = list.pop(0)
-                    while not re3.match(l, 0):
-                        #subt.append(string.replace(l[:-1], "\r", ""))
-                        subt.append(l.strip())
-                        l = list.pop(0)
-                    subtitles.append(subt)
-    except IndexError:
-        sys.stderr.write("Warning: it seems like input file is damaged or too short.\n")
-    return subtitles
-
-def read_tmp(list):
-    """
-    Reads tmplayer (tmp) subtitles.
-    input: contents of a file as list
-    returns: list of subtitles in form: [[time_dep, time_end, line1, ...],[time_dep, time_end, line1, ...],....]
-    """
-    re1 = re.compile("^(\d+):(\d+):(\d+):(.*)")
-    subtitles = []
-    subs={}
-    while len(list)>0:
-        m = re1.match(list.pop(0), 0)
-        if m:
-            time = int(m.group(1))*3600 + int(m.group(2))*60 + int(m.group(3))
-            if subs.has_key(time) :
-                subs[time].extend(m.group(4).strip().split("|"))
-            else:
-                subs[time] = m.group(4).strip().split("|")
-
-    times = subs.keys()
-    times.sort()
-    for i in range(0,len(times)):
-        next_time = 1;
-        while not subs.has_key(times[i]+next_time) and next_time < 4 :
-            next_time = next_time + 1
-        subt = [ times[i] , times[i] + next_time]
-        subt.extend(subs[times[i]])
-        subtitles.append(subt)
-    return subtitles
-
-def to_srt(list):
-    """
-    Converts list of subtitles (internal format) to srt format
-    """
-    outl = []
-    count = 1
-    for l in list:
-        secs1 = l[0]
-        h1 = int(secs1/3600)
-        m1 = int(int(secs1%3600)/60)
-        s1 = int(secs1%60)
-        f1 = (secs1 - int(secs1))*1000
-        secs2 = l[1]
-        h2 = int(secs2/3600)
-        m2 = int(int(secs2%3600)/60)
-        s2 = int(secs2%60)
-        f2 = (secs2 - int(secs2))*1000
-        outl.append("%d\n%.2d:%.2d:%.2d,%.3d --> %.2d:%.2d:%.2d,%.3d\n%s\n\n" % (count,h1,m1,s1,f1,h2,m2,s2,f2,"\n".join(l[2:])))
-        count = count + 1
-    return outl
-
-
-def sub_fix_times(sub):
-    for i in range( len(sub) - 2 ):
-        approx = min(1 + ( len(" ".join(sub[i][2:])) / 10 ), 9.9)                 # 10 char per second
-#       print sub[i][0],sub[i][1], sub[i][1] - sub[i][0], approx
-        if (sub[i + 1 ][0] <= sub[i][0]):
-            sub[i + 1 ][0] = sub[i][0] + approx + 0.2
-        #jesli mniej niz 1s
-        if sub[i][1] - sub[i][0] < 1:
-                sub[i][1] = sub[i][0] + approx
-        # end < start or end > start++ or displayed longer then 15s
-        if (sub[i][1] < sub[i][0]) or (sub[i][1] > sub[i + 1][0]) or ( sub[i][1] - sub[i][0] > 15):
-            if ( sub[i][0] + approx ) < sub[i + 1][0]:
-                sub[i][1] = sub[i][0] + approx
-            else:
-                sub[i][1] = sub[i + 1][0] - 0.2
-    return sub
-
-def get_split_times(str):
-    """
-    Converts comma-separated string of "xx:yy:zz,xx:yy:zz,..." times to list of times (in seconds)
-    input: string of comma-separated xx:yy:zz time positions
-    returns: list of times
-    """
-    tlist = str.split(",")
-    re1 = re.compile("^(\d+):(\d+):(\d+)")
-    times = []
-    for t in tlist:
-        m = re1.match(t, 0)
-        if not m:
-            sys.stderr.write("Unknown time format\n")
-            return []
-        times.append(int(m.group(1))*3600 + int(m.group(2))*60 + int(m.group(3)))
-    return times
-
-
-def read_subs(file,fmt,fps):
-    """
-    Reads subtitles fomr file, using format fmt
-    input : file name, format (srt,mdvd,tmp,auto)
-    returns: list of subtitles in form: [[time in secs, line1, ...],[time in secs, line1, ...],....]
-    """
-    src = open(file,'r')
-    subs = src.readlines()
-    src.close()
-    if fmt == "tmp":
-        return read_tmp(subs)
-    elif fmt == "srt":
-        return read_srt(subs)
-    elif fmt == "mdvd":
-        if fps == -1:
-            fps = detect_file_fps(file)
-            if not fps:
-                fps = detect_fps(subs)
-        return read_mdvd(subs, fps)
-    elif fmt == "auto":
-        fmt = detect_format(subs)
-        sys.stderr.write("Guessing subs format .. %s\n" % fmt )
-        return read_subs(file,fmt,fps)
-    elif fmt == "sub2":
-        return read_sub2(subs)
-    elif fmt == "mpl2":
-        return read_mpl2(subs)
-    else:
-        sys.stderr.write("Input format not specified/recognized\n")
-        sys.exit(1)
-
 def napiprojekt_fps(digest):
     url = "http://napiprojekt.pl/api/api.php?mode=file_info&client=dreambox&id=%s" % (urllib2.quote(digest))
 #    element = ET.parse( urllib2.urlopen(url)  )
@@ -378,16 +137,6 @@ def napiprojekt_fps(digest):
     except:
         fps = 23.976
     return float(fps)
-
-def read_sub(fmt, subs):
-    if fmt == "tmp":
-        return read_tmp(subs)
-    elif fmt == "srt":
-        return read_srt(subs)
-    elif fmt == "sub2":
-        return read_sub2(subs)
-    elif fmt == "mpl2":
-        return read_mpl2(subs)
 
 def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
     p, f = os.path.split(file)
@@ -402,9 +151,9 @@ def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
     try:
         subs_org = subs_org.replace("\r","").replace('{Y:i}',' ').replace('{y:i}',' ')
         dest = file[:-4] + '.srt'
-        subs_u , org_cod = convert_to_unicode( subs_org )
+        subs_u , org_cod = subutil.tounicode( subs_org )
         subs = subs_u.split('\n')
-        fmt = detect_format( subs )
+        fmt = subutil.detect_format( subs )
         print " Oryginal subtitle format: ", fmt, org_cod,
 
         if fmt == "mdvd":
@@ -416,9 +165,9 @@ def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
                 print " failback to napifps ",
                 fps = napiprojekt_fps(digest)
             print "FPS:", str(fps)[0:5], 
-            subs = "".join(to_srt( sub_fix_times( read_mdvd(subs, fps))))
+            subs = "".join(subutil.to_srt( subutil.sub_fix_times( subutil.read_mdvd(subs, fps))))
         elif fmt != "srt" :
-            subs = "".join(to_srt( sub_fix_times( read_sub(fmt, subs) )))
+            subs = "".join(subutil.to_srt( subutil.sub_fix_times( subutil.read_sub(fmt, subs) )))
         else:
             subs = subs_u
         subs = subs.encode("utf-8-sig")
