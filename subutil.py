@@ -6,13 +6,15 @@ import re
 def tounicode( sub ):
     if sub.startswith('\xef\xbb\xbf'):
         return sub.decode("utf-8-sig",'ignore'), "utf-8-sig"
-    iso = 0
+    elif sub.startswith( ('\xff\xfe\x00\x00', '\x00\x00\xfe\xff') ):
+        return sub.decode("utf-32",'ignore'), "utf-32"
+    elif sub.startswith( ('\xff\xfe', '\xfe\xff') ):
+        return sub.decode("utf-16",'ignore'), "utf-16"
+    iso = win = utf = 0
     for i in (161, 166, 172, 177, 182, 188):
         iso += sub.count(chr(i))
-    win = 0
     for i in (140, 143, 156, 159, 165, 185):
         win += sub.count(chr(i))
-    utf = 0
     for i in (195, 196, 197):
         utf += sub.count(chr(i))
     if win > utf and win > iso:
