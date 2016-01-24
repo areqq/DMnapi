@@ -167,7 +167,7 @@ def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
             print "FPS:", str(fps)[0:5], 
             subs = "".join(subutil.to_srt( subutil.sub_fix_times( subutil.read_mdvd(subs, fps))))
         elif fmt != "srt" :
-            subs = "".join(subutil.to_srt( subutil.sub_fix_times( subutil.read_subs(fmt, subs) )))
+            subs = "".join(subutil.to_srt( subutil.sub_fix_times( subutil.read_subs(subs, fps))))
         else:
             subs = subs_u
         subs = subs.encode("utf-8-sig")
