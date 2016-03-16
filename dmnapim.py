@@ -155,6 +155,8 @@ def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
         subs = subs_u.split('\n')
         fmt = subutil.detect_format( subs )
         print " Oryginal subtitle format: ", fmt, org_cod,
+        if fmt == 'unknown':
+            return None
 
         if fmt == "mdvd":
             if not 22 < fps < 32:
@@ -265,7 +267,8 @@ def find_imdb(path):
 
 def hashFile(name):
     try:
-        filesize = 0
+        filesize = hash = 0
+        imdb = ''
         d = md5()
         longlongformat = 'Q'  # unsigned long long little endian
         bytesize = struct.calcsize(longlongformat)
@@ -283,11 +286,10 @@ def hashFile(name):
         hash&= 0xFFFFFFFFFFFFFFFF
         f.close() 
         imdb = find_imdb(name)
-        ret = dict( osb = "%016x" % hash, npb = d.hexdigest(), fsize = filesize, imdb = imdb )
-        return ret 
     except:
         print "[DMnapi] Error hashFile: ", name
-        return dict( osb = "%016x" % 0, npb = d.hexdigest(), fsize = filesize )
+
+    return dict( osb = "%016x" % hash, npb = d.hexdigest(), fsize = filesize, imdb = imdb )
 
 def get_sub_from_n24(file, id, fps = 0):
     try:

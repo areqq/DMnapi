@@ -45,7 +45,7 @@ def detect_format(list):
             return "sub2"
         elif re_mpl2.match(line):
             return "mpl2"
-    return ""
+    return "unknown"
 
 def read_mdvd(list, fps):
     """
