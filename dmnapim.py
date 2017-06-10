@@ -149,9 +149,9 @@ def to_srt_utf8(subs_org, file, digest = 0, info = "", fps = 0, save = True):
         print "Subtitle not found ;("
         return ""
     try:
-        subs_org = subs_org.replace("\r","").replace('{Y:i}',' ').replace('{y:i}',' ')
         dest = file[:-4] + '.srt'
         subs_u , org_cod = subutil.tounicode( subs_org )
+        subs_u = subs_u.replace('\r', '').replace('{Y:i}',' ').replace('{y:i}',' ') 
         subs = subs_u.split('\n')
         fmt = subutil.detect_format( subs )
         print " Oryginal subtitle format: ", fmt, org_cod,
