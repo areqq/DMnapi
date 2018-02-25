@@ -303,8 +303,6 @@ if __name__ == "__main__":
                     if d == 'DreamExplorer':
                         saveDEkeymap()
                         print "\t keymap.xml saved."
-                    else:
-                        print "- problem, I didn't recognize the file - DMnapi not enabled."
         else:
             print d, "\n\tnot found."
     print
