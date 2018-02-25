@@ -8,7 +8,8 @@ from Screens.MessageBox import MessageBox
 from Screens.ChoiceBox import ChoiceBox
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from enigma import eTimer, iPlayableService, iServiceInformation, getDesktop
+from enigma import iPlayableService, iServiceInformation, getDesktop
+from compat import eTimer
 from twisted.web.client import getPage
 import urllib, urllib2, json
 import os, os.path, socket, re

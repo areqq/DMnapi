@@ -4,7 +4,8 @@ from Screens.Screen import Screen
 from Plugins.Plugin import PluginDescriptor
 from Components.config import config, ConfigSubsection, ConfigYesNo, ConfigText, ConfigInteger
 from Components.ServiceEventTracker import ServiceEventTracker
-from enigma import iPlayableService, iServiceInformation, eTimer, getDesktop
+from enigma import iPlayableService, iServiceInformation, getDesktop
+from compat import eTimer
 import os
 
 config.plugins.dmnapi = ConfigSubsection()

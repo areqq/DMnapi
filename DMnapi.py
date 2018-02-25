@@ -11,7 +11,8 @@ from Screens.ChoiceBox import ChoiceBox
 from Screens.InfoBar import InfoBar
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from enigma import eTimer, iPlayableService, iServiceInformation
+from enigma import iPlayableService, iServiceInformation
+from compat import eTimer
 from twisted.web.client import getPage
 import urllib, urllib2, json
 import os, os.path, socket, re
