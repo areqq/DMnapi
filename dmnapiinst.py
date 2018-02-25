@@ -106,11 +106,9 @@ DM_patch = { "FileBrowser": [[[
 			if not val[3][B_FILTER] & FILTER_GOUP and self.filter == FILTER_NONE:
 """],[
 """
-			self.session.openWithCallback(self.__setupCallback, BrowserSetup, self.__hidelist)
 		elif what[1] == "delete":
 """,
 """
-			self.session.openWithCallback(self.__setupCallback, BrowserSetup, self.__hidelist)
 		elif what[1] == "dmnapi":
 			from Plugins.Extensions.DMnapi.DMnapi import DMnapi
 			self.session.openWithCallback(self.__moviePlayerCallback, DMnapi, path[B_FULL])
