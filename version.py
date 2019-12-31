@@ -28,7 +28,7 @@ def get_box_info():
     atr_box_info = "%s.%s.%s.%s" % (p[4], atr_box_info, p[1], getEnigmaVersionString())
     if atr_box_info == None:
         atr_box_info = 'unknown'
-    return atr_box_info 
+    return atr_box_info.replace(' ','')
 
 class Update():
     def __init__(self, session = None):
