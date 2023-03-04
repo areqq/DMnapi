@@ -34,13 +34,13 @@ class Update():
     def __init__(self, session = None):
         self.session = session
         atr_box_info = get_box_info()
-        getPage('http://areq.eu.org/dmnapi/version?' + atr_box_info ).addCallback(self.webversion).addErrback(self.getPageError)
+        getPage('http://areq.eu.org/dmnapi/version?' + version + '--' + atr_box_info ).addCallback(self.webversion).addErrback(self.getPageError)
 
     def webversion(self, html = ''):
         if 4 < len(html) < 30:
             v = html.split('\n')[0]
             if v > version:
-                getPage('http://areq.eu.org/dmnapi/update.py').addCallback(self.doupdate).addErrback(self.getPageError)
+                getPage('http://areq.eu.org/dmnapi/update.py?' + version).addCallback(self.doupdate).addErrback(self.getPageError)
 
     def doupdate(self, html = ''):
         try:
