@@ -248,6 +248,15 @@ def parse_name(name):
 def find_imdb(path):
     ImdbId = ''
     try:
+        if path.startswith('http'):
+            while True:
+                path = '/'.join(path.split('/')[0:-1])
+                if len(path) < 30:
+                    return ''
+                l = url_range(path + '/.imdbid', 0, 20).strip()
+                if len(l) > 3:
+                    return 'tt' + l
+
         (dir, fname) = os.path.split(path)
         if os.path.exists(path[:-3] + 'nfo'):
             nfof = [ path[:-3] + 'nfo' ]
@@ -262,32 +271,58 @@ def find_imdb(path):
                 if m and m.group("imdbid"):
                     ImdbId = m.group("imdbid")
     except:
-        pass
+        print "DMnapi: find_imdb except"
     return ImdbId
 
-def hashFile(name):
+def url_size(name):
+    s = 0
     try:
-        filesize = hash = 0
-        imdb = ''
-        d = md5()
-        longlongformat = 'Q'  # unsigned long long little endian
-        bytesize = struct.calcsize(longlongformat)
-        format= "<%d%s" % (65536//bytesize, longlongformat)
-        f = open(name, "rb") 
-        filesize = os.fstat(f.fileno()).st_size
+        if name.startswith('http'):
+            req = urllib2.urlopen(name)
+            s = int(req.info().getheader('Content-Length'))
+        else:
+            f = open(name, "rb")
+            s = os.fstat(f.fileno()).st_size
+            f.close()
+    except:
+        print "DMnapi: url_size except"
+    return s
+
+def url_range(name, start, stop):
+    try:
+        if name.startswith('http'):
+            req = urllib2.Request(name, headers = {'Range': 'bytes=%i-%i' % (start, stop - 1)})
+            return urllib2.urlopen(req).read()
+        else:
+            f = open(name, "rb")
+            f.seek(start, os.SEEK_SET)
+            return f.read(stop - start)
+            f.close()
+    except:
+        print "DMnapi: url_range except"
+    return ''
+
+def hashFile(name):
+    print "[DMnapi] start hashFile: ", name
+    imdb = ''
+    d = md5()
+    filesize = hash = 0
+    bytesize = struct.calcsize('Q')
+    format= "<%d%s" % (65536//bytesize, 'Q')
+    try:
+        filesize = url_size(name)
         hash = filesize 
-        buffer= f.read(10485760)
+        buffer= url_range(name, 0, 10485760)
         longlongs= struct.unpack(format, buffer[0:65536])
         hash+= sum(longlongs)
         d.update(buffer)
-        f.seek(-65536, os.SEEK_END) # size is always > 131072
-        longlongs= struct.unpack(format, f.read(65536))
+        buffer= url_range(name, filesize - 65536, filesize)
+        longlongs= struct.unpack(format, buffer)
         hash+= sum(longlongs)
         hash&= 0xFFFFFFFFFFFFFFFF
-        f.close() 
         imdb = find_imdb(name)
     except:
-        print "[DMnapi] Error hashFile: ", name
+        print "[DMnapi] Error hashFile: ", name       
 
     return dict( osb = "%016x" % hash, npb = d.hexdigest(), fsize = filesize, imdb = imdb )
 
