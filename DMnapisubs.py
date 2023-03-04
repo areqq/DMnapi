@@ -48,7 +48,7 @@ class DMnapisubs(Screen):
         print "DMnapi init plik: %s, auto: %s" % (self.plik, auto)
 
         self["status"] = Label("Hint: in DreamExpoler use TEXT button")
-        self["info"] = Label("DMnapi 2015.10.22 for AFP -  http://areq.eu.org/")
+        self["info"] = Label("DMnapi 15.11.08 for AFP -  http://areq.eu.org/")
         self["label"] = Label(" Path: %s\n   File: %s\n" % ( path, file) )
         self["right"] = Label("")
 
@@ -156,6 +156,8 @@ class DMnapisubs(Screen):
             self.fh['plik'] = self.plik
             self.fh['box'] = 'dmnapi4afp'
             print "DMnapi: licz_hash finish", self.fh
+            if len(self.fh.get('imdb', '')) > 4: 
+                self.get_omdbapi(self.fh['imdb'])
 
     def koniec(self):
         self.close(None)
@@ -343,6 +345,10 @@ class DMnapisubs(Screen):
                     self.fh.update(q)
             except:
                 pass
+    def get_omdbapi(self, imdb):
+        print 'DMnapi - get_omdbapi', imdb
+        url = 'http://www.omdbapi.com/?apikey=dd87e662&i=%s' % imdb
+        getPage(url).addCallback(self.omdbapi).addErrback(self.znp_imdb_e)      
 
     def znp_imdb(self, html = None):
         print 'DMnapi - pobranie imdb z napiprojekt'
@@ -351,11 +357,9 @@ class DMnapisubs(Screen):
                 i = f.find('www.imdb.com/title/')
                 if i > 0:
                     imdb = f[i+18:].split('/')[1]
-                    print 'DMnapi - pobranie imdb:', imdb
+                    print 'DMnapi - pobrano imdb z n24:', imdb
                     self.fh['imdb'] = imdb
-                    url = 'http://www.omdbapi.com/?i=%s' % imdb
-                    getPage(url).addCallback(self.omdbapi).addErrback(self.znp_imdb_e)
-                    print 'DMnapi - pobranie imdb z napiprojekt:', imdb
+                    self.get_omdbapi()
         except:
             print 'DMnapi - imdb - problem'
             import traceback
