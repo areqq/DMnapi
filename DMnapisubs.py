@@ -48,7 +48,7 @@ class DMnapisubs(Screen):
         print "DMnapi init plik: %s, auto: %s" % (self.plik, auto)
 
         self["status"] = Label("Hint: in DreamExpoler use TEXT button")
-        self["info"] = Label("DMnapi 15.11.08 for AFP -  http://areq.eu.org/")
+        self["info"] = Label("DMnapi 23.03.04 for AFP -  http://areq.eu.org/")
         self["label"] = Label(" Path: %s\n   File: %s\n" % ( path, file) )
         self["right"] = Label("")
 

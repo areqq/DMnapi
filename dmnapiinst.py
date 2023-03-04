@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #    DMnapi for Dreambox-Enigma2
-#    Version: 15.11.08
+#    Version: 23.03.04
 #    Coded by areq (c) 2010-2015
 #    Support: http://dvhk.pl/
 #    http://areq.eu.org/

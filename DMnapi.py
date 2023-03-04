@@ -491,7 +491,7 @@ class DMnapi(Screen):
                     imdb = f[i+18:].split('/')[1]
                     print 'DMnapi - pobranie imdb:', imdb
                     self.fh['imdb'] = imdb
-                    url = 'http://www.omdbapi.com/?i=%s' % imdb
+                    url = 'http://www.omdbapi.com/?apikey=dd87e662&i=%s' % imdb
                     getPage(url).addCallback(self.omdbapi).addErrback(self.znp_imdb_e)
                     print 'DMnapi - pobranie imdb z napiprojekt:', imdb
         except:

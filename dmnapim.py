@@ -111,7 +111,7 @@ def np_postdata(digest, lang = "PL"):
         "downloaded_subtitles_id" : digest,
         "mode" : "1",
         "client" : "DMnapi",
-        "client_ver" : "15.11.08",
+        "client_ver" : "23.03.04",
         "downloaded_subtitles_lang" : lang,
         "downloaded_subtitles_txt" : "1" }
     return urllib.urlencode(data)
@@ -417,7 +417,7 @@ def parse_n24(lines):
 def http_n24(url):
     content = ''
     try:
-        req = urllib2.Request(url, headers = {'Referer' : 'http://napisy24.pl', 'User-Agent' : 'DMnapi 13.1.30'})
+        req = urllib2.Request(url, headers = {'Referer' : 'http://napisy24.pl', 'User-Agent' : 'DMnapi 23.03.04'})
         socket.setdefaulttimeout(20)
         f = urllib2.urlopen(req)
         content = f.read()
